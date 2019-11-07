@@ -3,7 +3,7 @@
 open System.IO
 open Microsoft.Extensions.Logging
 
-type FileWatchEventFunction = FileInfo -> unit
+type FileWatchEventFunction =  ILogger -> WatcherChangeTypes -> string -> unit
 
 type FileWatcherParameters = {
     logger : ILogger;
@@ -18,12 +18,12 @@ let createFileWatcher (parms : FileWatcherParameters) =
     
     let onChangeFunc(src:obj)(evt:FileSystemEventArgs) =
         do parms.logger.LogInformation(sprintf "File: %s %A" evt.FullPath evt.ChangeType)
-        do parms.actionFunction(new FileInfo(evt.FullPath))
+        do parms.actionFunction parms.logger evt.ChangeType  evt.FullPath
         ()
     
     let onRenameFunc(src:obj)(evt:RenamedEventArgs) =
         do parms.logger.LogInformation(sprintf "File: %s renamed to %s" evt.OldFullPath evt.FullPath)
-        do parms.actionFunction(new FileInfo(evt.FullPath))
+        do parms.actionFunction parms.logger evt.ChangeType evt.FullPath
         ()
 
     let onChangeFuncDelegate = new FileSystemEventHandler(onChangeFunc)
@@ -40,8 +40,6 @@ let createFileWatcher (parms : FileWatcherParameters) =
 
     do watcher.IncludeSubdirectories <- parms.includeSubDirs
     do watcher.Created.AddHandler(onChangeFuncDelegate)
-    do watcher.Changed.AddHandler(onChangeFuncDelegate)
-    do watcher.Deleted.AddHandler(onChangeFuncDelegate)
     do watcher.Renamed.AddHandler(onRenameFuncDelegate)
     do watcher.EnableRaisingEvents <- true
     watcher
