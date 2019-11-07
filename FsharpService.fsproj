@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="FileWatcher.fs" />
+    <Compile Include="ProcessFile.fs" />
     <None Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
